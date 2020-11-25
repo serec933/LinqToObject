@@ -145,6 +145,7 @@ namespace LinqToObject
             }
 
             //Filtro OfType, mi serve un arraylist
+            Console.WriteLine("------------------");
             var list = new ArrayList();
             list.Add(productList);
             list.Add("questa è una stringa");
@@ -169,6 +170,7 @@ namespace LinqToObject
             Console.WriteLine(p1);
 
             //ordinamento
+            Console.WriteLine("------------------");
             Console.WriteLine("Ordinamento: ");
             var orderedList =
                 from p in productList
@@ -194,16 +196,65 @@ namespace LinqToObject
             {
                 Console.WriteLine(item.Nome + "  " + item.Prezzo);
             }
-
+            Console.WriteLine("------------------");
             //quantificatori
             var HasProductWithT = productList.Any(p => p.Name.StartsWith('T'));
             var AllProductWithT = productList.All(p => p.Name.StartsWith('T'));
             
             Console.WriteLine("Ci sono prodotti che iniziano con la T? {0}",HasProductWithT);
             Console.WriteLine("Tutti i prodotti iniziano con la T? {0}", AllProductWithT);
-        
-            
+
+            //GROUP BY
+            Console.WriteLine("------------------");
+            Console.WriteLine("GROUP BY");
+
+            //query
+            //raggruppiamo order per id del prodotto
+            var groupByList = from o in orderList
+                              group o by (o.ProductID) into groupList
+                              select groupList;
+
+
+            foreach (var order in groupByList)
+            {
+                Console.WriteLine(order.Key);
+                foreach (var item in order)
+                {
+                    Console.WriteLine($"\t {item.ProductID} {item.Quantity}");
+                }
+            }
+            var groupByList2 = from o in productList
+                              group o by (o.Name) into groupList
+                              select groupList;
+            //groupList e groupByList sono uguali, avrei potuto andare avanti
+            //ritorna un IGrouping -> una chiave + una lista delle cose che hai raggruppato per quella chiave.
+            //Lista di liste identificate da un chiave
+            foreach (var o in groupByList2)
+            {
+                Console.WriteLine(o.Key);
+                foreach (var item in o)
+                {
+                    Console.WriteLine($"\t {item.Name} - {item.UnitPrice}");
+                }
+            }
+
+            var groupByList3 =
+                orderList.GroupBy(o => o.ProductID);
+
+            foreach (var order in groupByList3)
+            {
+                Console.WriteLine(order.Key);
+                foreach (var item in order)
+                {
+                    Console.WriteLine($"\t {item.ProductID} {item.Quantity}");
+                }
+            }
+
+            //
+            Console.WriteLine("------------------");
+            Console.WriteLine("GROUP BY");
         }
+
     }
 
 
