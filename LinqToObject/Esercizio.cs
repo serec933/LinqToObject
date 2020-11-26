@@ -252,7 +252,117 @@ namespace LinqToObject
 
             //
             Console.WriteLine("------------------");
-            Console.WriteLine("GROUP BY");
+            Console.WriteLine("Funzione di Aggregazione");
+            //Ragruppo ordini per prodotto e ricavare la somma delle quantità per prodotto
+            //select dice come voglio vedere i risultati
+            var sumQuantityByProduct =
+                orderList
+                .GroupBy(p => p.ProductID)
+                .Select(lista => new 
+                { 
+                    Id = lista.Key, 
+                    Quantities = lista.Sum(p => p.Quantity)
+                });
+
+            foreach (var item in sumQuantityByProduct)
+            {
+                Console.WriteLine("{0} - {1}", item.Id,item.Quantities);
+            }
+            
+            var sumQuantityByProduct1= 
+                from o in orderList
+                group o by o.ProductID into groupList
+                select new { Id = groupList.Key, Quantities = groupList.Sum(x => x.Quantity) };
+
+            foreach (var item in sumQuantityByProduct1)
+            {
+                Console.WriteLine("{0} - {1}", item.Id, item.Quantities);
+            }
+
+            //Join, sempre inner join
+            Console.WriteLine("------------");
+            Console.WriteLine("JOIN");
+            //RECUPERIAMO I PRODOTTI CHE HANNO ORDINI
+            //NOME - ID ORDINE - QUANTITY
+
+            //METHOD SYNTAX
+            var joinList = productList
+                .Join(orderList,
+                p => p.ID,
+                o => o.ProductID,
+                (p, o) => new { Nome = p.Name, IDOrder = o.ID, Quant = o.Quantity });
+
+            foreach (var p in joinList)
+            {
+                Console.WriteLine("{0} -{1} - {2}",p.IDOrder, p.Nome, p.Quant);
+            }
+
+            //query syntax
+
+            var joinList1 = from p in productList
+                            join o in orderList
+                            on p.ID equals o.ProductID
+                            select new
+                            {
+                                Nome = p.Name,
+                                OrderID = o.ID,
+                                Quant = o.Quantity
+                            };
+            Console.WriteLine("         ");
+            foreach (var item in joinList1)
+            {
+                Console.WriteLine("{0} - {1} - {2}",item.OrderID,item.Nome,item.Quant);
+            }
+
+
+            //GROUP JOIN
+            Console.WriteLine("--------");
+            Console.WriteLine("GROUP JOIN");
+            //Recuperare ordini per prodotto e fare somma per quantità
+            //nome prodotto - quantita totale
+
+            var groupJoinList = productList
+                .GroupJoin(orderList,
+                p => p.ID,     ///questo è rispetto a cosa raggruppiamo
+                o => o.ProductID,
+                (p, o) => new
+                {
+                    Prodotto = p.Name,
+                    ID = p.ID,
+                    Quantita = o.Sum(o => o.Quantity)
+                });
+            foreach (var item in groupJoinList)
+            {
+                Console.WriteLine("{0} - {1} - {2}",item.ID, item.Prodotto, item.Quantita);
+            }
+
+
+            var groupJoinList1 = from p in productList
+                                 join o in orderList
+                                 on p.ID equals o.ProductID
+                                 into gr
+                                 select new { nome = p.Name, Quant = gr.Sum(x => x.Quantity) };
+            
+            Console.WriteLine("        ");
+            foreach (var item in groupJoinList1)
+            {
+                Console.WriteLine("{0} - {1} ", item.nome,item.Quant);
+            }
+            var lista4 =
+                from o in orderList
+                group o by o.ProductID
+                into gr
+                select new { ProdottoID = gr.Key, Quantità = gr.Sum(o => o.Quantity)}
+                into gr1
+                join p in productList
+                on gr1.ProdottoID equals p.ID
+                select new { p.Name , gr1.Quantità };
+
+            Console.WriteLine( "     ");
+            foreach (var item in lista4)
+            {
+                Console.WriteLine(item.Name + " - " + item.Quantità);
+            }
         }
 
     }
